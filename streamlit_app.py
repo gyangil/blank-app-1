@@ -6,12 +6,6 @@ import numpy as np
 def load_similarity_matrix_local():
     return pd.read_csv("s_matrix_top30.csv", index_col=0)
 
-# Normalize similarity matrix index
-def normalize_similarity_matrix(similarity_matrix):
-    similarity_matrix.index = similarity_matrix.index.str.lstrip('m')
-    similarity_matrix.columns = similarity_matrix.columns.str.lstrip('m')
-    return similarity_matrix
-
 # Load movies.dat file
 def load_movies():
     movies = pd.read_csv(
@@ -58,7 +52,6 @@ def main():
     # Load and normalize the similarity matrix
     st.write("Loading similarity matrix...")
     similarity_matrix = load_similarity_matrix_local()
-    similarity_matrix = normalize_similarity_matrix(similarity_matrix)
 
     # Load movies data
     st.write("Loading movies...")
