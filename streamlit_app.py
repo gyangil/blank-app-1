@@ -83,7 +83,6 @@ def main():
             # Preserve user ratings in session state
             current_rating = st.session_state.user_ratings.get(movie_id, "Select a rating")
             selected_rating = st.radio(
-                f"Select a rating for {row['title']}",
                 options=["Select a rating", "★", "★★", "★★★", "★★★★", "★★★★★"],
                 index=["Select a rating", "★", "★★", "★★★", "★★★★", "★★★★★"].index(current_rating) if current_rating in ["Select a rating", "★", "★★", "★★★", "★★★★", "★★★★★"] else 0
             )
