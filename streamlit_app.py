@@ -64,39 +64,52 @@ def main():
     st.write("Loading movies...")
     movies_df = load_movies()
 
+    # Initialize session state for user ratings
+    if 'user_ratings' not in st.session_state:
+        st.session_state.user_ratings = {}
+
     # Pagination for movies
     page = st.number_input("Page", min_value=1, max_value=(len(movies_df) // 6) + 1, step=1, value=1)
     start_idx = (page - 1) * 6
     end_idx = start_idx + 6
 
     # Display 6 movies per page
-    user_ratings = {}
     cols = st.columns(3)
     for idx, (movie_id, row) in enumerate(movies_df.iloc[start_idx:end_idx].iterrows()):
         with cols[idx % 3]:
             poster_url = f"https://liangfgithub.github.io/MovieImages/{movie_id}.jpg"
             st.image(poster_url, caption=row['title'], use_container_width=True)
-            user_ratings[movie_id] = st.radio(
+
+            # Preserve user ratings in session state
+            current_rating = st.session_state.user_ratings.get(movie_id, "Select a rating")
+            selected_rating = st.radio(
                 f"Select a rating for {row['title']}",
                 options=["Select a rating", "★", "★★", "★★★", "★★★★", "★★★★★"],
-                index=0
+                index=["Select a rating", "★", "★★", "★★★", "★★★★", "★★★★★"].index(current_rating) if current_rating in ["Select a rating", "★", "★★", "★★★", "★★★★", "★★★★★"] else 0
             )
+            st.session_state.user_ratings[movie_id] = selected_rating
 
     # Convert ratings to numerical values
-    for movie_id in user_ratings:
-        rating = user_ratings[movie_id]
-        user_ratings[movie_id] = {"★": 1, "★★": 2, "★★★": 3, "★★★★": 4, "★★★★★": 5}.get(rating, np.nan)
+    user_ratings = {
+        movie_id: {"★": 1, "★★": 2, "★★★": 3, "★★★★": 4, "★★★★★": 5}.get(rating, np.nan)
+        for movie_id, rating in st.session_state.user_ratings.items()
+    }
+
 
     # Process user input
     if st.button("Get Recommendations"):
         st.write("Generating recommendations...")
 
+        # Debug: Print user ratings
+        # st.write("Current User Ratings:", user_ratings)
+ 
         # Generate recommendations
         recommendations = myIBCF(user_ratings, similarity_matrix)
 
         st.header("Top 10 Movie Recommendations")
         for i, movie_id in enumerate(recommendations, start=1):
             st.write(f"{i}. {movies_df.loc[int(movie_id), 'title']}")
+        
 
 if __name__ == "__main__":
     main()
